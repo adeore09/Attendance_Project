@@ -1,0 +1,192 @@
+{% extends '../dashboard/base.html' %}
+{% load static %}
+{% block content %}
+
+<script>
+  function delete_attendance_category(attendance_cat_id,attendance_cat_name)
+  {
+    if (confirm("Kindly confirm deletion of attendance Category"+attendance_cat_name) == true) {
+      window.location.href="/attendance/manage-attendance-cat-del/"+attendance_cat_id;
+    }
+  }
+</script>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1 class="m-0">Dashboard</h1>
+          </div><!-- /.col -->
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">Dashboard v1</li>
+            </ol>
+          </div><!-- /.col -->
+        </div><!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <!-- SELECT2 attendancePLE -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Manage Attendance- (Selected Unversity / Board : {{university}})</h3>
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+            </div>
+          </div>
+          <!-- /.card-header -->
+          <div class="card-body">
+            <table id="attendanceple2" class="table table-bordered table-striped">
+              <thead>
+              <tr>
+                <th>Attendance Category</th>
+                
+                {% if my_university == "yes" %}
+                <th>Update</th>
+                <th>Delete</th>
+                {% endif %}
+              </tr>
+              </thead>
+              <tbody>
+                
+                {% for attendance_cat in manage_attendance_category_table_data%} 
+                
+                <tr>
+                   
+                 
+                  
+                  <td>{{attendance_cat.category_name}}</td>
+            
+                  
+                  {% if my_university == "yes" %}
+                   <td><a href="{% url 'manage_attendance_cat_upd' attendance_cat.id %}"><button type="button" class="btn btn-block btn-primary">Edit</button></a></td>
+                 
+                  <td><button type="button" class="btn btn-block btn-danger" onclick="delete_attendance_category({{attendance_cat.id}},'{{attendance_cat.category_name}}');">Delete</button></td>
+                  {% endif %}
+                </tr>
+                {% endfor %}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>attendance Category</th>
+                  
+                  {% if my_university == "yes" %}
+                  <th>Update</th>
+                  <th>Delete</th>
+                  {% endif %}
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <!-- /.card-body -->
+        </div>
+        <div class="card card-default">
+          <div class="card-header">
+            {% if request.path == "/attendance/manage-attendance-cat-ins" %}
+            <h3 class="card-title">Add attendance Category</h3>
+            {% else %}
+            <h3 class="card-title">Update attendance Category</h3>
+            {% endif %}
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+            </div>
+          </div>
+          <!-- /.card-header -->
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-12">
+                <form method="POST" id="manage_courses_form" data-prog-rev-url="{% url 'ajax_load_prog_rev' %}">
+                  {% csrf_token %}
+                  <div class="card-body">
+                    <div class="form-group">
+                      {{manage_attendance_category_form}}
+                      
+                    </div>
+                  </div>
+                  <!-- /.card-body -->
+
+                  <div class="card-footer">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+            <!-- /.row -->
+          </div>
+          <!-- /.card-body -->
+          <div class="card-footer">
+            Visit <a href="https://select2.github.io/">Select2 documentation</a> for more attendanceples and information about
+            the plugin.
+          </div>
+        </div>
+        <!-- /.card -->
+      </div><!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script>
+    $("#id_course_program").change(function () {
+        const url = $("#manage_courses_form").attr("data-prog-rev-url");  // get the url of the `load_cities` view
+        const program_id = $(this).val();  // get the selected country ID from the HTML input
+
+        $.ajax({                       // initialize an AJAX request
+            url: url,                    // set the url of the request (= /persons/ajax/load-cities/ )
+            data: {
+                'program_id': program_id       // add the country id to the GET parameters
+            },
+            success: function (data) {   // `data` is the return of the `load_cities` view function
+                $("#id_course_program_revision").html(data);  // replace the contents of the city input with the data that came from the server
+                /*
+
+                let html_data = '<option value="">---------</option>';
+                data.forEach(function (city) {
+                    html_data += `<option value="${city.id}">${city.name}</option>`
+                });
+                console.log(html_data);
+                $("#id_city").html(html_data);
+
+                */
+            }
+        });
+
+    });
+  </script>
+  <!-- jQuery -->
+  <script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+  <!-- jQuery UI 1.11.4 -->
+  <script src="{% static 'plugins/jquery-ui/jquery-ui.min.js' %}"></script>
+  <script>
+    $(function () {
+      $("#attendanceple2").DataTable({
+        "responsive": true, "lengthChange": false, "autoWidth": false,
+        "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+      }).buttons().container().appendTo('#attendanceple2_wrapper .col-md-6:eq(0)');
+
+      $('#attendanceple1').DataTable({
+        "paging": true,
+        "lengthChange": false,
+        "searching": false,
+        "ordering": true,
+        "info": true,
+        "autoWidth": false,
+        "responsive": true,
+      });
+    });
+  </script>
+
+{% endblock %}
+  
